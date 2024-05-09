@@ -6,7 +6,6 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/iPingOi/graphcycle/graph/model"
 )
@@ -14,11 +13,9 @@ import (
 // CreateCategory is the resolver for the createCategory field.
 func (r *mutationResolver) CreateCategory(ctx context.Context, input model.NewCategory) (*model.Category, error) {
 	category, err := r.CategoryDB.Create(input.Name, *input.Description)
-
 	if err != nil {
 		return nil, err
 	}
-
 	return &model.Category{
 		ID:          category.ID,
 		Name:        category.Name,
@@ -29,11 +26,9 @@ func (r *mutationResolver) CreateCategory(ctx context.Context, input model.NewCa
 // CreateCourse is the resolver for the createCourse field.
 func (r *mutationResolver) CreateCourse(ctx context.Context, input model.NewCourse) (*model.Course, error) {
 	course, err := r.CourseDB.Create(input.Name, *input.Description, input.CategoryID)
-
 	if err != nil {
 		return nil, err
 	}
-
 	return &model.Course{
 		ID:   course.ID,
 		Name: course.Name,
@@ -59,7 +54,19 @@ func (r *queryResolver) Categories(ctx context.Context) ([]*model.Category, erro
 
 // Courses is the resolver for the courses field.
 func (r *queryResolver) Courses(ctx context.Context) ([]*model.Course, error) {
-	panic(fmt.Errorf("not implemented: Courses - courses"))
+	courses, err := r.CourseDB.FindAll()
+	if err != nil {
+		return nil, err
+	}
+	var coursesModel []*model.Course
+	for _, course := range courses {
+		coursesModel = append(coursesModel, &model.Course{
+			ID:          course.ID,
+			Name:        course.Name,
+			Description: &course.Description,
+		})
+	}
+	return coursesModel, nil
 }
 
 // Mutation returns MutationResolver implementation.
